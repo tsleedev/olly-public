@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>원탭 카운터 - 와이어프레임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+    
+    .screens { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 40px; 
+      justify-content: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .screen-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .phone {
+      width: 280px;
+      height: 580px;
+      background: white;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #f8f8f8;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .status-bar {
+      height: 44px;
+      background: #f8f8f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .dynamic-island {
+      width: 90px;
+      height: 25px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    
+    .nav-bar {
+      height: 50px;
+      background: #f8f8f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 17px;
+      font-weight: 600;
+      border-bottom: 0.5px solid #ddd;
+      position: relative;
+    }
+    
+    .content { 
+      padding: 16px; 
+      flex: 1;
+      overflow-y: auto;
+      height: calc(100% - 94px - 34px);
+    }
+    
+    /* Home Screen */
+    .counter-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .counter-card:hover {
+      transform: scale(1.02);
+    }
+    
+    .counter-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-right: 14px;
+    }
+    
+    .counter-info { flex: 1; }
+    .counter-name { font-weight: 600; font-size: 16px; color: #333; }
+    .counter-goal { font-size: 13px; color: #999; margin-top: 2px; }
+    
+    .counter-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .add-btn {
+      position: absolute;
+      bottom: 50px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: #007AFF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+      box-shadow: 0 4px 15px rgba(0,122,255,0.4);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .add-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: #000;
+      border-radius: 3px;
+    }
+    
+    /* Widget */
+    .widget-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .widget {
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .widget:hover {
+      transform: scale(1.03);
+    }
+    
+    .widget-small {
+      width: 155px;
+      height: 155px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .widget-small .w-icon { font-size: 36px; }
+    .widget-small .w-count { font-size: 42px; font-weight: 700; }
+    .widget-small .w-label { font-size: 13px; color: #666; }
+    
+    .widget-medium {
+      width: 329px;
+      height: 155px;
+      display: flex;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .widget-medium .w-left {
+      flex: 1;
+    }
+    
+    .widget-medium .w-icon { font-size: 32px; margin-bottom: 8px; }
+    .widget-medium .w-label { font-size: 15px; color: #666; margin-bottom: 4px; }
+    .widget-medium .w-count { font-size: 48px; font-weight: 700; }
+    .widget-medium .w-goal { font-size: 14px; color: #999; }
+    
+    .widget-medium .w-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .w-btn {
+      width: 70px;
+      height: 50px;
+      background: #007AFF;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .w-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .w-btn.minus { background: #FF3B30; }
+    
+    /* Add/Edit Screen */
+    .form-section {
+      margin-bottom: 24px;
+    }
+    
+    .form-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-left: 16px;
+    }
+    
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .form-row {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 0.5px solid #eee;
+    }
+    
+    .form-row:last-child { border-bottom: none; }
+    
+    .form-row-label {
+      font-size: 16px;
+      color: #333;
+      flex: 1;
+    }
+    
+    .form-row-value {
+      font-size: 16px;
+      color: #999;
+    }
+    
+    .form-input {
+      flex: 1;
+      text-align: right;
+      font-size: 16px;
+      color: #333;
+    }
+    
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      padding: 12px;
+    }
+    
+    .icon-option {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .icon-option:hover {
+      background: #f0f0f0;
+    }
+    
+    .icon-option.selected {
+      background: #007AFF;
+    }
+    
+    .nav-btn {
+      color: #007AFF;
+      font-size: 17px;
+      position: absolute;
+      cursor: pointer;
+    }
+    
+    .nav-btn.left { left: 16px; }
+    .nav-btn.right { right: 16px; font-weight: 600; }
+    
+    /* Detail Screen */
+    .detail-header {
+      text-align: center;
+      padding: 20px 20px;
+      background: linear-gradient(180deg, #e3f2fd 0%, #f8f8f8 100%);
+    }
+    
+    .detail-icon { font-size: 36px; margin-bottom: 8px; }
+    .detail-count { font-size: 64px; font-weight: 700; color: #333; }
+    .detail-goal { font-size: 16px; color: #666; margin-top: 4px; }
+    
+    .detail-actions {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .detail-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .detail-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .detail-btn.plus { background: #007AFF; }
+    .detail-btn.minus { background: #FF3B30; }
+    
+    .history-section {
+      padding: 0 16px 16px;
+    }
+    
+    .history-title {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    
+    .history-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 0.5px solid #eee;
+      font-size: 15px;
+    }
+    
+    .history-row:last-child {
+      border-bottom: none;
+    }
+    
+    .progress-ring {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 8px solid #e0e0e0;
+      border-top-color: #007AFF;
+      border-right-color: #007AFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+    
+    .info-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .info-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .info-box ul {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      padding-left: 20px;
+    }
+    
+    .color-options {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+    }
+    
+    .color-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    
+    .color-dot:hover {
+      transform: scale(1.2);
+    }
+    
+    .color-dot.selected {
+      box-shadow: 0 0 0 3px white, 0 0 0 5px #007AFF;
+    }
+  </style>
+</head>
+<body>
+  <h1>원탭 카운터 🎯</h1>
+  <p class="subtitle">Wireframe v1.0 - 외주용 디자인 가이드</p>
+  
+  <div class="screens">
+    <!-- Home Screen -->
+    <div class="screen-container">
+      <div class="screen-label">1. 홈 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">나의 카운터</div>
+          <div class="content">
+            <div class="counter-card">
+              <div class="counter-icon" style="background: #e3f2fd;">💧</div>
+              <div class="counter-info">
+                <div class="counter-name">물 마시기</div>
+                <div class="counter-goal">목표 8잔</div>
+              </div>
+              <div class="counter-value">5</div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-icon" style="background: #fff3e0;">☕</div>
+              <div class="counter-info">
+                <div class="counter-name">커피</div>
+                <div class="counter-goal">목표 3잔</div>
+              </div>
+              <div class="counter-value">2</div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-icon" style="background: #fce4ec;">🚬</div>
+              <div class="counter-info">
+                <div class="counter-name">담배</div>
+                <div class="counter-goal">최대 5개비</div>
+              </div>
+              <div class="counter-value">3</div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-icon" style="background: #e8f5e9;">🏃</div>
+              <div class="counter-info">
+                <div class="counter-name">운동</div>
+                <div class="counter-goal">목표 1회</div>
+              </div>
+              <div class="counter-value">0</div>
+            </div>
+          </div>
+          <div class="add-btn">+</div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Detail Screen -->
+    <div class="screen-container">
+      <div class="screen-label">2. 상세 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            물 마시기
+            <span class="nav-btn left">‹ 뒤로</span>
+            <span class="nav-btn right">편집</span>
+          </div>
+          <div class="detail-header">
+            <div class="detail-icon">💧</div>
+            <div class="progress-ring">
+              <span style="font-size: 24px; font-weight: 700;">63%</span>
+            </div>
+            <div class="detail-count">5</div>
+            <div class="detail-goal">/ 8잔</div>
+          </div>
+          <div class="detail-actions">
+            <div class="detail-btn minus">−</div>
+            <div class="detail-btn plus">+</div>
+          </div>
+          <div class="history-section">
+            <div class="history-title">오늘 기록</div>
+            <div class="history-card">
+              <div class="history-row">
+                <span>오전 9:15</span>
+                <span style="color: #34C759;">+1</span>
+              </div>
+              <div class="history-row">
+                <span>오전 10:30</span>
+                <span style="color: #34C759;">+1</span>
+              </div>
+              <div class="history-row">
+                <span>오후 12:45</span>
+                <span style="color: #34C759;">+1</span>
+              </div>
+              <div class="history-row">
+                <span>오후 2:20</span>
+                <span style="color: #34C759;">+1</span>
+              </div>
+              <div class="history-row">
+                <span>오후 4:00</span>
+                <span style="color: #34C759;">+1</span>
+              </div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add/Edit Screen -->
+    <div class="screen-container">
+      <div class="screen-label">3. 추가/편집</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            새 카운터
+            <span class="nav-btn left">취소</span>
+            <span class="nav-btn right">저장</span>
+          </div>
+          <div class="content">
+            <div class="form-section">
+              <div class="form-label">기본 정보</div>
+              <div class="form-card">
+                <div class="form-row">
+                  <span class="form-row-label">이름</span>
+                  <span class="form-input" style="color: #999;">카운터 이름 입력</span>
+                </div>
+                <div class="form-row">
+                  <span class="form-row-label">목표</span>
+                  <span class="form-input">8</span>
+                </div>
+                <div class="form-row">
+                  <span class="form-row-label">단위</span>
+                  <span class="form-input">잔</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <div class="form-label">아이콘</div>
+              <div class="form-card">
+                <div class="icon-grid">
+                  <div class="icon-option selected">💧</div>
+                  <div class="icon-option">☕</div>
+                  <div class="icon-option">🚬</div>
+                  <div class="icon-option">🏃</div>
+                  <div class="icon-option">💊</div>
+                  <div class="icon-option">📚</div>
+                  <div class="icon-option">🍎</div>
+                  <div class="icon-option">🥗</div>
+                  <div class="icon-option">💪</div>
+                  <div class="icon-option">😴</div>
+                  <div class="icon-option">🧘</div>
+                  <div class="icon-option">✨</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <div class="form-label">테마 색상</div>
+              <div class="form-card">
+                <div class="color-options">
+                  <div class="color-dot selected" style="background: #007AFF;"></div>
+                  <div class="color-dot" style="background: #34C759;"></div>
+                  <div class="color-dot" style="background: #FF9500;"></div>
+                  <div class="color-dot" style="background: #FF3B30;"></div>
+                  <div class="color-dot" style="background: #AF52DE;"></div>
+                  <div class="color-dot" style="background: #5856D6;"></div>
+                  <div class="color-dot" style="background: #FF2D55;"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <div class="form-label">설정</div>
+              <div class="form-card">
+                <div class="form-row">
+                  <span class="form-row-label">리셋 주기</span>
+                  <span class="form-row-value">매일 자정 ›</span>
+                </div>
+                <div class="form-row">
+                  <span class="form-row-label">알림</span>
+                  <span class="form-row-value">꺼짐 ›</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Widgets -->
+    <div class="screen-container">
+      <div class="screen-label">4. 위젯</div>
+      <div class="widget-container">
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Small (2×2) - 탭 전체 = +1</div>
+          <div class="widget widget-small" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+            <div class="w-icon">💧</div>
+            <div class="w-count">5</div>
+            <div class="w-label">/ 8잔</div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Medium (4×2) - +/- 버튼 분리</div>
+          <div class="widget widget-medium">
+            <div class="w-left">
+              <div class="w-icon">💧</div>
+              <div class="w-label">물 마시기</div>
+              <div class="w-count">5</div>
+              <div class="w-goal">목표 8잔</div>
+            </div>
+            <div class="w-right">
+              <div class="w-btn">+</div>
+              <div class="w-btn minus">−</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-box">
+          <h3>💡 위젯 인터랙션</h3>
+          <ul>
+            <li><b>Small:</b> 전체 탭 = +1</li>
+            <li><b>Medium:</b> +/- 버튼으로 조절</li>
+            <li>탭 시 햅틱 피드백</li>
+            <li>숫자 변경 애니메이션</li>
+            <li>목표 달성 시 시각 효과</li>
+          </ul>
+        </div>
+        
+        <div class="info-box">
+          <h3>🎨 디자이너 요청사항</h3>
+          <ul>
+            <li>iOS 17+ 스타일</li>
+            <li>라이트/다크 모드 지원</li>
+            <li>앱 아이콘 (1024×1024)</li>
+            <li>위젯 배경 그라데이션</li>
+            <li>부드러운 마이크로 애니메이션</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="max-width: 800px; margin: 60px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <h2 style="margin-bottom: 20px;">📋 기능 명세</h2>
+    
+    <h3 style="color: #007AFF; margin: 20px 0 10px;">핵심 기능</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li>카운터 생성/편집/삭제</li>
+      <li>위젯에서 원탭으로 +1 증가</li>
+      <li>일별/주별/월별 리셋 옵션</li>
+      <li>목표 설정 및 진행률 표시</li>
+      <li>기록 히스토리 (시간별)</li>
+    </ul>
+    
+    <h3 style="color: #007AFF; margin: 20px 0 10px;">위젯 종류</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li><b>Small (2×2):</b> 단일 카운터, 탭 = +1</li>
+      <li><b>Medium (4×2):</b> 단일 카운터 + 버튼</li>
+      <li><b>Large (4×4):</b> 여러 카운터 한눈에 (선택사항)</li>
+    </ul>
+    
+    <h3 style="color: #007AFF; margin: 20px 0 10px;">추가 기능 (v2)</h3>
+    <ul style="line-height: 2; padding-left: 24px; color: #666;">
+      <li>통계 차트 (일/주/월간)</li>
+      <li>목표 달성 알림</li>
+      <li>Apple Watch 지원</li>
+      <li>iCloud 동기화</li>
+    </ul>
+  </div>
+</body>
+</html>
