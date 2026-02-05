@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 감정 일기 - 와이어프레임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+    
+    .screens { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 40px; 
+      justify-content: center;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .screen-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .phone {
+      width: 280px;
+      height: 580px;
+      background: white;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #f8f8f8;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .status-bar {
+      height: 44px;
+      background: #f8f8f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .dynamic-island {
+      width: 90px;
+      height: 25px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    
+    .nav-bar {
+      height: 50px;
+      background: #f8f8f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 17px;
+      font-weight: 600;
+      border-bottom: 0.5px solid #ddd;
+      position: relative;
+    }
+    
+    .content { 
+      padding: 16px; 
+      flex: 1;
+      overflow-y: auto;
+      height: calc(100% - 94px - 34px);
+    }
+    
+    .nav-btn {
+      color: #007AFF;
+      font-size: 17px;
+      position: absolute;
+      cursor: pointer;
+    }
+    .nav-btn.left { left: 16px; }
+    .nav-btn.right { right: 16px; font-weight: 600; }
+    
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: #000;
+      border-radius: 3px;
+    }
+    
+    /* Home Screen */
+    .mood-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .mood-date {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    
+    .mood-emoji {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .mood-text {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    
+    .ai-insight {
+      background: linear-gradient(135deg, #e8f4fd 0%, #f0e8fd 100%);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .ai-insight-label {
+      font-size: 11px;
+      color: #8B5CF6;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .add-btn {
+      position: absolute;
+      bottom: 50px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+      box-shadow: 0 4px 15px rgba(139,92,246,0.4);
+      cursor: pointer;
+    }
+    
+    /* Write Screen */
+    .mood-selector {
+      display: flex;
+      justify-content: space-around;
+      padding: 16px;
+      background: white;
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .mood-option {
+      font-size: 32px;
+      padding: 8px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .mood-option.selected {
+      background: #e8f4fd;
+      transform: scale(1.2);
+    }
+    
+    .text-area {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 150px;
+      margin-bottom: 16px;
+    }
+    
+    .text-placeholder {
+      color: #999;
+      font-size: 15px;
+    }
+    
+    .ai-chat {
+      background: linear-gradient(135deg, #f0e8fd 0%, #e8f4fd 100%);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    
+    .ai-avatar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .ai-avatar-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+    }
+    
+    .ai-name {
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .ai-message {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+    
+    /* Stats Screen */
+    .stats-header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(180deg, #f0e8fd 0%, #f8f8f8 100%);
+    }
+    
+    .stats-week {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .day-mood {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .day-label {
+      font-size: 11px;
+      color: #999;
+    }
+    
+    .day-emoji {
+      font-size: 24px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .stat-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .stat-chart {
+      height: 60px;
+      background: linear-gradient(180deg, #e8f4fd 0%, white 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 8px;
+    }
+    
+    .chart-bar {
+      width: 20px;
+      background: linear-gradient(180deg, #8B5CF6 0%, #6366F1 100%);
+      border-radius: 4px 4px 0 0;
+    }
+    
+    /* Widget */
+    .widget-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .widget {
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    
+    .widget-small {
+      width: 155px;
+      height: 155px;
+      background: linear-gradient(135deg, #f0e8fd 0%, #e8f4fd 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .widget-small .w-title {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .widget-small .w-moods {
+      display: flex;
+      gap: 8px;
+      font-size: 24px;
+    }
+    
+    .widget-small .w-hint {
+      font-size: 11px;
+      color: #999;
+    }
+    
+    .widget-medium {
+      width: 329px;
+      height: 155px;
+      background: linear-gradient(135deg, #f0e8fd 0%, #e8f4fd 100%);
+      padding: 16px;
+    }
+    
+    .widget-medium .w-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .widget-medium .w-title {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .widget-medium .w-streak {
+      font-size: 12px;
+      color: #8B5CF6;
+      font-weight: 600;
+    }
+    
+    .widget-medium .w-calendar {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .widget-medium .w-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .widget-medium .w-day-label {
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .widget-medium .w-day-mood {
+      font-size: 20px;
+    }
+    
+    .widget-medium .w-cta {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #8B5CF6;
+      font-weight: 600;
+    }
+    
+    .info-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .info-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .info-box ul {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      padding-left: 20px;
+    }
+    
+    .tab-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 16px;
+      right: 16px;
+      height: 50px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 25px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .tab-item.active {
+      color: #8B5CF6;
+    }
+    
+    .tab-item .tab-icon {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI 감정 일기 🧠</h1>
+  <p class="subtitle">Wireframe v1.0 - iOS 17 Style</p>
+  
+  <div class="screens">
+    <!-- Home Screen -->
+    <div class="screen-container">
+      <div class="screen-label">1. 홈 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            나의 감정 일기
+            <span class="nav-btn right">📊</span>
+          </div>
+          <div class="content">
+            <div class="mood-card">
+              <div class="mood-date">오늘 • 2월 5일 수요일</div>
+              <div class="mood-emoji">😊</div>
+              <div class="mood-text">프로젝트가 드디어 마무리됐다. 팀원들과 함께 저녁을 먹으며 축하했다.</div>
+              <div class="ai-insight">
+                <div class="ai-insight-label">🤖 AI 인사이트</div>
+                성취감과 동료애를 느끼셨네요! 팀워크의 가치를 소중히 여기시는 모습이 인상적이에요.
+              </div>
+            </div>
+            
+            <div class="mood-card">
+              <div class="mood-date">어제 • 2월 4일 화요일</div>
+              <div class="mood-emoji">😰</div>
+              <div class="mood-text">마감이 다가오는데 아직 해야 할 일이 많아서 불안했다.</div>
+              <div class="ai-insight">
+                <div class="ai-insight-label">🤖 AI 인사이트</div>
+                마감 압박감을 느끼셨군요. 작은 단위로 나눠서 하나씩 해결해보세요.
+              </div>
+            </div>
+            
+            <div class="mood-card">
+              <div class="mood-date">2월 3일 월요일</div>
+              <div class="mood-emoji">😐</div>
+              <div class="mood-text">그냥 평범한 하루였다. 특별한 일은 없었지만 나쁘지도 않았다.</div>
+            </div>
+          </div>
+          <div class="add-btn">+</div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Write Screen -->
+    <div class="screen-container">
+      <div class="screen-label">2. 일기 작성</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            오늘의 감정
+            <span class="nav-btn left">취소</span>
+            <span class="nav-btn right">저장</span>
+          </div>
+          <div class="content">
+            <div class="mood-selector">
+              <div class="mood-option">😊</div>
+              <div class="mood-option selected">😐</div>
+              <div class="mood-option">😢</div>
+              <div class="mood-option">😡</div>
+              <div class="mood-option">😰</div>
+            </div>
+            
+            <div class="text-area">
+              <div class="text-placeholder">오늘 하루는 어땠나요?<br>당신의 이야기를 들려주세요...</div>
+            </div>
+            
+            <div class="ai-chat">
+              <div class="ai-avatar">
+                <div class="ai-avatar-icon">🤖</div>
+                <span class="ai-name">AI 친구</span>
+              </div>
+              <div class="ai-message">
+                "평범함도 소중해요. 오늘 하루 중 가장 기억에 남는 순간이 있다면 뭐였나요?"
+              </div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats Screen -->
+    <div class="screen-container">
+      <div class="screen-label">3. 통계 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            감정 분석
+            <span class="nav-btn left">‹ 뒤로</span>
+          </div>
+          <div class="stats-header">
+            <div class="stats-week">
+              <div class="day-mood">
+                <div class="day-label">월</div>
+                <div class="day-emoji">😐</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">화</div>
+                <div class="day-emoji">😰</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">수</div>
+                <div class="day-emoji">😊</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">목</div>
+                <div class="day-emoji">😊</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">금</div>
+                <div class="day-emoji" style="opacity: 0.3;">○</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">토</div>
+                <div class="day-emoji" style="opacity: 0.3;">○</div>
+              </div>
+              <div class="day-mood">
+                <div class="day-label">일</div>
+                <div class="day-emoji" style="opacity: 0.3;">○</div>
+              </div>
+            </div>
+          </div>
+          <div class="content" style="padding-top: 0;">
+            <div class="stat-card">
+              <div class="stat-title">이번 주 평균 감정</div>
+              <div class="stat-value">😊 긍정적</div>
+              <div class="stat-chart">
+                <div class="chart-bar" style="height: 30px;"></div>
+                <div class="chart-bar" style="height: 15px;"></div>
+                <div class="chart-bar" style="height: 45px;"></div>
+                <div class="chart-bar" style="height: 50px;"></div>
+                <div class="chart-bar" style="height: 10px; opacity: 0.3;"></div>
+                <div class="chart-bar" style="height: 10px; opacity: 0.3;"></div>
+                <div class="chart-bar" style="height: 10px; opacity: 0.3;"></div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-title">연속 기록</div>
+              <div class="stat-value">🔥 4일째</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-title">자주 느끼는 감정</div>
+              <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <span style="font-size: 24px;">😊</span>
+                <span style="font-size: 20px; opacity: 0.7;">😰</span>
+                <span style="font-size: 18px; opacity: 0.5;">😐</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-title">AI 주간 분석</div>
+              <div style="font-size: 13px; color: #666; margin-top: 8px; line-height: 1.5;">
+                "이번 주는 업무 성과와 관련된 감정 변화가 뚜렷했어요. 마감 전 불안감이 있었지만 완료 후 큰 성취감을 느끼셨네요."
+              </div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Widgets -->
+    <div class="screen-container">
+      <div class="screen-label">4. 위젯</div>
+      <div class="widget-container">
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Small (2×2) - 빠른 감정 기록</div>
+          <div class="widget widget-small">
+            <div class="w-title">오늘 기분은?</div>
+            <div class="w-moods">
+              <span>😊</span>
+              <span>😐</span>
+              <span>😢</span>
+              <span>😰</span>
+            </div>
+            <div class="w-hint">탭해서 기록</div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Medium (4×2) - 주간 감정 캘린더</div>
+          <div class="widget widget-medium">
+            <div class="w-header">
+              <span class="w-title">이번 주 감정</span>
+              <span class="w-streak">🔥 4일째 기록 중</span>
+            </div>
+            <div class="w-calendar">
+              <div class="w-day">
+                <span class="w-day-label">월</span>
+                <span class="w-day-mood">😐</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">화</span>
+                <span class="w-day-mood">😰</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">수</span>
+                <span class="w-day-mood">😊</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">목</span>
+                <span class="w-day-mood">😊</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">금</span>
+                <span class="w-day-mood" style="opacity: 0.3;">○</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">토</span>
+                <span class="w-day-mood" style="opacity: 0.3;">○</span>
+              </div>
+              <div class="w-day">
+                <span class="w-day-label">일</span>
+                <span class="w-day-mood" style="opacity: 0.3;">○</span>
+              </div>
+            </div>
+            <div class="w-cta">오늘의 감정 기록하기 →</div>
+          </div>
+        </div>
+        
+        <div class="info-box">
+          <h3>🎨 디자인 컨셉</h3>
+          <ul>
+            <li>보라색 그라데이션 (AI/심리 느낌)</li>
+            <li>이모지 기반 감정 표현</li>
+            <li>AI 인사이트 카드</li>
+            <li>부드러운 애니메이션</li>
+          </ul>
+        </div>
+        
+        <div class="info-box">
+          <h3>📱 주요 기능</h3>
+          <ul>
+            <li>원탭 감정 기록 (위젯)</li>
+            <li>AI 맞춤형 질문</li>
+            <li>감정 패턴 분석</li>
+            <li>주간/월간 리포트</li>
+            <li>음성 저널링 (v2.0)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="max-width: 800px; margin: 60px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <h2 style="margin-bottom: 20px;">📋 기능 명세</h2>
+    
+    <h3 style="color: #8B5CF6; margin: 20px 0 10px;">핵심 기능 (MVP)</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li>감정 선택 (이모지 5종)</li>
+      <li>일기 작성 (텍스트)</li>
+      <li>AI 피드백 (OpenAI API)</li>
+      <li>달력/리스트 뷰</li>
+      <li>홈스크린 위젯 (Small)</li>
+      <li>기본 통계</li>
+    </ul>
+    
+    <h3 style="color: #8B5CF6; margin: 20px 0 10px;">위젯 종류</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li><b>Small (2×2):</b> 감정 선택 버튼 4개</li>
+      <li><b>Medium (4×2):</b> 주간 감정 캘린더</li>
+      <li><b>Lock Screen:</b> 오늘 감정 상태</li>
+    </ul>
+    
+    <h3 style="color: #8B5CF6; margin: 20px 0 10px;">추가 기능 (v2.0)</h3>
+    <ul style="line-height: 2; padding-left: 24px; color: #666;">
+      <li>음성 저널링</li>
+      <li>감정 정원 (게이미피케이션)</li>
+      <li>고급 AI 분석</li>
+      <li>Apple Watch</li>
+      <li>데이터 내보내기</li>
+    </ul>
+  </div>
+</body>
+</html>

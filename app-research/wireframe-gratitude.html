@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감사 일기 - 와이어프레임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+    
+    .screens { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 40px; 
+      justify-content: center;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .screen-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .phone {
+      width: 280px;
+      height: 580px;
+      background: white;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #FFFBF5;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .status-bar {
+      height: 44px;
+      background: #FFFBF5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .dynamic-island {
+      width: 90px;
+      height: 25px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    
+    .nav-bar {
+      height: 50px;
+      background: #FFFBF5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 17px;
+      font-weight: 600;
+      border-bottom: 0.5px solid #F0E6D8;
+      position: relative;
+    }
+    
+    .content { 
+      padding: 16px; 
+      flex: 1;
+      overflow-y: auto;
+      height: calc(100% - 94px - 34px);
+    }
+    
+    .nav-btn {
+      color: #E67E22;
+      font-size: 17px;
+      position: absolute;
+      cursor: pointer;
+    }
+    .nav-btn.left { left: 16px; }
+    .nav-btn.right { right: 16px; font-weight: 600; }
+    
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: #000;
+      border-radius: 3px;
+    }
+    
+    /* Home Screen */
+    .date-header {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .date-sub {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 20px;
+    }
+    
+    .gratitude-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-left: 4px solid #F39C12;
+    }
+    
+    .gratitude-num {
+      font-size: 12px;
+      color: #F39C12;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .gratitude-text {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.5;
+    }
+    
+    .gratitude-photo {
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      border-radius: 8px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #E67E22;
+      font-size: 24px;
+    }
+    
+    .add-gratitude {
+      background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .streak-banner {
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .streak-text {
+      font-size: 14px;
+      color: #E67E22;
+      font-weight: 600;
+    }
+    
+    /* Write Screen */
+    .prompt-card {
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .prompt-label {
+      font-size: 12px;
+      color: #E67E22;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .prompt-text {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .input-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .input-num {
+      font-size: 12px;
+      color: #F39C12;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .input-field {
+      width: 100%;
+      min-height: 60px;
+      background: #FFFBF5;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .photo-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      background: #FFFBF5;
+      border-radius: 8px;
+      color: #E67E22;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    
+    /* Calendar Screen */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .calendar-month {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      gap: 16px;
+      color: #E67E22;
+    }
+    
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .calendar-day-header {
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+      padding: 8px 0;
+    }
+    
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 13px;
+      background: white;
+    }
+    
+    .calendar-day.done {
+      background: #FEF3E2;
+    }
+    
+    .calendar-day.today {
+      background: #F39C12;
+      color: white;
+    }
+    
+    .calendar-day .check {
+      font-size: 10px;
+      color: #F39C12;
+    }
+    
+    .throwback-card {
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    
+    .throwback-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .throwback-icon {
+      font-size: 20px;
+    }
+    
+    .throwback-label {
+      font-size: 14px;
+      color: #E67E22;
+      font-weight: 600;
+    }
+    
+    .throwback-content {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.5;
+    }
+    
+    .throwback-date {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    
+    /* Widget */
+    .widget-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .widget {
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    
+    .widget-small {
+      width: 155px;
+      height: 155px;
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+    }
+    
+    .widget-small .w-title {
+      font-size: 12px;
+      color: #E67E22;
+      font-weight: 600;
+    }
+    
+    .widget-small .w-count {
+      font-size: 36px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .widget-small .w-progress {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .widget-small .w-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #F39C12;
+    }
+    
+    .widget-small .w-dot.empty {
+      background: rgba(243, 156, 18, 0.3);
+    }
+    
+    .widget-medium {
+      width: 329px;
+      height: 155px;
+      background: linear-gradient(135deg, #FEF3E2 0%, #FDE8D0 100%);
+      padding: 16px;
+    }
+    
+    .widget-medium .w-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .widget-medium .w-title {
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .widget-medium .w-streak {
+      font-size: 12px;
+      color: #E67E22;
+    }
+    
+    .widget-medium .w-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .widget-medium .w-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .widget-medium .w-num {
+      width: 20px;
+      height: 20px;
+      background: #F39C12;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .widget-medium .w-num.empty {
+      background: rgba(243, 156, 18, 0.3);
+    }
+    
+    .widget-medium .w-text {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .widget-medium .w-text.filled {
+      color: #333;
+    }
+    
+    .info-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .info-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .info-box ul {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>감사 일기 🙏</h1>
+  <p class="subtitle">Wireframe v1.0 - iOS 17 Style</p>
+  
+  <div class="screens">
+    <!-- Home Screen -->
+    <div class="screen-container">
+      <div class="screen-label">1. 홈 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            감사 일기
+            <span class="nav-btn right">📅</span>
+          </div>
+          <div class="content">
+            <div class="date-header">2월 5일</div>
+            <div class="date-sub">수요일 • 오늘</div>
+            
+            <div class="streak-banner">
+              <div class="streak-text">🔥 7일 연속 감사 기록 중!</div>
+            </div>
+            
+            <div class="gratitude-card">
+              <div class="gratitude-num">첫 번째 감사</div>
+              <div class="gratitude-text">아침에 따뜻한 커피 한 잔으로 하루를 시작할 수 있어서 감사해요.</div>
+            </div>
+            
+            <div class="gratitude-card">
+              <div class="gratitude-num">두 번째 감사</div>
+              <div class="gratitude-text">팀 프로젝트가 성공적으로 마무리되어서 정말 감사합니다.</div>
+              <div class="gratitude-photo">📷</div>
+            </div>
+            
+            <div class="gratitude-card">
+              <div class="gratitude-num">세 번째 감사</div>
+              <div class="gratitude-text">오랜만에 연락한 친구의 따뜻한 응원 메시지</div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Write Screen -->
+    <div class="screen-container">
+      <div class="screen-label">2. 감사 기록</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            오늘의 감사
+            <span class="nav-btn left">취소</span>
+            <span class="nav-btn right">저장</span>
+          </div>
+          <div class="content">
+            <div class="prompt-card">
+              <div class="prompt-label">💡 오늘의 프롬프트</div>
+              <div class="prompt-text">오늘 당신을 미소 짓게 한 것은 무엇인가요?</div>
+            </div>
+            
+            <div class="input-card">
+              <div class="input-num">1️⃣ 첫 번째</div>
+              <div class="input-field">감사한 것을 적어주세요...</div>
+              <div class="photo-btn">📷 사진 추가</div>
+            </div>
+            
+            <div class="input-card">
+              <div class="input-num">2️⃣ 두 번째</div>
+              <div class="input-field">감사한 것을 적어주세요...</div>
+            </div>
+            
+            <div class="input-card">
+              <div class="input-num">3️⃣ 세 번째</div>
+              <div class="input-field">감사한 것을 적어주세요...</div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Calendar Screen -->
+    <div class="screen-container">
+      <div class="screen-label">3. 캘린더 뷰</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            캘린더
+            <span class="nav-btn left">‹ 뒤로</span>
+          </div>
+          <div class="content">
+            <div class="calendar-header">
+              <span class="calendar-nav">‹</span>
+              <span class="calendar-month">2025년 2월</span>
+              <span class="calendar-nav">›</span>
+            </div>
+            
+            <div class="calendar-grid">
+              <div class="calendar-day-header">일</div>
+              <div class="calendar-day-header">월</div>
+              <div class="calendar-day-header">화</div>
+              <div class="calendar-day-header">수</div>
+              <div class="calendar-day-header">목</div>
+              <div class="calendar-day-header">금</div>
+              <div class="calendar-day-header">토</div>
+              
+              <div class="calendar-day"></div>
+              <div class="calendar-day"></div>
+              <div class="calendar-day"></div>
+              <div class="calendar-day"></div>
+              <div class="calendar-day"></div>
+              <div class="calendar-day"></div>
+              <div class="calendar-day done">1<span class="check">✓</span></div>
+              
+              <div class="calendar-day done">2<span class="check">✓</span></div>
+              <div class="calendar-day done">3<span class="check">✓</span></div>
+              <div class="calendar-day done">4<span class="check">✓</span></div>
+              <div class="calendar-day today">5</div>
+              <div class="calendar-day">6</div>
+              <div class="calendar-day">7</div>
+              <div class="calendar-day">8</div>
+              
+              <div class="calendar-day">9</div>
+              <div class="calendar-day">10</div>
+              <div class="calendar-day">11</div>
+              <div class="calendar-day">12</div>
+              <div class="calendar-day">13</div>
+              <div class="calendar-day">14</div>
+              <div class="calendar-day">15</div>
+            </div>
+            
+            <div class="throwback-card">
+              <div class="throwback-header">
+                <span class="throwback-icon">🔄</span>
+                <span class="throwback-label">1년 전 오늘</span>
+              </div>
+              <div class="throwback-content">
+                "새로운 직장에서 첫 출근을 무사히 마쳐서 감사해요. 동료들이 친절하게 대해줬어요."
+              </div>
+              <div class="throwback-date">2024년 2월 5일</div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Widgets -->
+    <div class="screen-container">
+      <div class="screen-label">4. 위젯</div>
+      <div class="widget-container">
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Small (2×2) - 오늘 기록 현황</div>
+          <div class="widget widget-small">
+            <div class="w-title">오늘의 감사</div>
+            <div class="w-count">2/3</div>
+            <div class="w-progress">
+              <div class="w-dot"></div>
+              <div class="w-dot"></div>
+              <div class="w-dot empty"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Medium (4×2) - 빠른 기록</div>
+          <div class="widget widget-medium">
+            <div class="w-header">
+              <span class="w-title">🙏 오늘의 감사</span>
+              <span class="w-streak">🔥 7일째</span>
+            </div>
+            <div class="w-inputs">
+              <div class="w-input">
+                <div class="w-num">1</div>
+                <div class="w-text filled">따뜻한 커피 한 잔</div>
+              </div>
+              <div class="w-input">
+                <div class="w-num">2</div>
+                <div class="w-text filled">팀 프로젝트 성공</div>
+              </div>
+              <div class="w-input">
+                <div class="w-num empty">3</div>
+                <div class="w-text">탭해서 추가...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-box">
+          <h3>🎨 디자인 컨셉</h3>
+          <ul>
+            <li>따뜻한 오렌지/베이지 톤</li>
+            <li>3가지 감사 = 3개의 카드</li>
+            <li>사진 첨부 가능</li>
+            <li>Throwback 기능</li>
+          </ul>
+        </div>
+        
+        <div class="info-box">
+          <h3>📱 주요 기능</h3>
+          <ul>
+            <li>매일 3가지 감사 기록</li>
+            <li>일별 프롬프트 제공</li>
+            <li>사진 첨부</li>
+            <li>캘린더 히트맵</li>
+            <li>Throwback 알림</li>
+            <li>위젯 빠른 기록</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="max-width: 800px; margin: 60px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <h2 style="margin-bottom: 20px;">📋 기능 명세</h2>
+    
+    <h3 style="color: #E67E22; margin: 20px 0 10px;">핵심 기능 (MVP)</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li>매일 3가지 감사 기록</li>
+      <li>일별 프롬프트 (30개+)</li>
+      <li>사진 첨부 (1장)</li>
+      <li>달력/리스트 뷰</li>
+      <li>홈스크린 위젯</li>
+      <li>리마인더 알림</li>
+    </ul>
+    
+    <h3 style="color: #E67E22; margin: 20px 0 10px;">위젯 종류</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li><b>Small (2×2):</b> 오늘 기록 현황 (2/3)</li>
+      <li><b>Medium (4×2):</b> 빠른 감사 기록</li>
+      <li><b>Lock Screen:</b> 스트릭 표시</li>
+    </ul>
+    
+    <h3 style="color: #E67E22; margin: 20px 0 10px;">추가 기능 (v2.0)</h3>
+    <ul style="line-height: 2; padding-left: 24px; color: #666;">
+      <li>Throwback 알림 (1주/1달/1년 전)</li>
+      <li>패턴 분석 (자주 감사하는 것)</li>
+      <li>확언 (Affirmations)</li>
+      <li>데이터 내보내기 (PDF)</li>
+      <li>가족 공유</li>
+    </ul>
+  </div>
+</body>
+</html>

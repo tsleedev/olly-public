@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>포모도로 타이머 - 와이어프레임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f7;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    h1 { text-align: center; color: #333; margin-bottom: 10px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+    
+    .screens { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 40px; 
+      justify-content: center;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .screen-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .phone {
+      width: 280px;
+      height: 580px;
+      background: white;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #1C1C1E;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .phone-screen.light {
+      background: #F2F2F7;
+    }
+    
+    .status-bar {
+      height: 44px;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .phone-screen.light .status-bar {
+      color: #333;
+    }
+    
+    .dynamic-island {
+      width: 90px;
+      height: 25px;
+      background: #000;
+      border-radius: 20px;
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    
+    .dynamic-island.active {
+      width: 180px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    
+    .di-timer {
+      color: #FF6B6B;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .di-icon {
+      font-size: 16px;
+    }
+    
+    .content { 
+      padding: 16px; 
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: white;
+      border-radius: 3px;
+      opacity: 0.5;
+    }
+    
+    /* Timer Screen */
+    .timer-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 8px solid rgba(255,107,107,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 32px;
+    }
+    
+    .timer-circle::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      border: 8px solid transparent;
+      border-top-color: #FF6B6B;
+      border-right-color: #FF6B6B;
+      transform: rotate(-45deg);
+    }
+    
+    .timer-label {
+      font-size: 14px;
+      color: #FF6B6B;
+      margin-bottom: 8px;
+    }
+    
+    .timer-time {
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .phone-screen.light .timer-time {
+      color: #333;
+    }
+    
+    .timer-session {
+      font-size: 13px;
+      color: #666;
+      margin-top: 8px;
+    }
+    
+    .timer-controls {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .control-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .control-btn.primary {
+      background: #FF6B6B;
+      color: white;
+    }
+    
+    .control-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .phone-screen.light .control-btn.secondary {
+      background: rgba(0,0,0,0.05);
+      color: #333;
+    }
+    
+    .pomodoro-count {
+      display: flex;
+      gap: 8px;
+      margin-top: 32px;
+    }
+    
+    .pomo-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,107,107,0.3);
+    }
+    
+    .pomo-dot.done {
+      background: #FF6B6B;
+    }
+    
+    /* Stats Screen */
+    .stats-header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .stats-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+    
+    .stats-sub {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .stat-row {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .stat-chart {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .chart-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+    
+    .chart-bars {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 80px;
+    }
+    
+    .chart-bar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .chart-bar {
+      width: 24px;
+      background: linear-gradient(180deg, #FF6B6B 0%, #FF8E53 100%);
+      border-radius: 4px 4px 0 0;
+    }
+    
+    .chart-label {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    /* Widget */
+    .widget-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .widget {
+      background: #1C1C1E;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .widget-small {
+      width: 155px;
+      height: 155px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+    }
+    
+    .widget-small .w-icon {
+      font-size: 32px;
+    }
+    
+    .widget-small .w-time {
+      font-size: 36px;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .widget-small .w-label {
+      font-size: 12px;
+      color: #FF6B6B;
+    }
+    
+    .widget-small .w-btn {
+      background: #FF6B6B;
+      color: white;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .widget-medium {
+      width: 329px;
+      height: 155px;
+      display: flex;
+      padding: 16px;
+    }
+    
+    .widget-medium .w-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .widget-medium .w-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .widget-medium .w-time {
+      font-size: 42px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+    
+    .widget-medium .w-label {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .widget-medium .w-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .widget-medium .w-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .widget-medium .w-btn.primary {
+      background: #FF6B6B;
+      color: white;
+    }
+    
+    .widget-medium .w-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .widget-medium .w-stats {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .widget-medium .w-pomo {
+      font-size: 14px;
+    }
+    
+    .info-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .info-box h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .info-box ul {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      padding-left: 20px;
+    }
+    
+    /* Break Screen */
+    .break-circle {
+      border-color: rgba(78, 205, 196, 0.2);
+    }
+    
+    .break-circle::before {
+      border-top-color: #4ECDC4;
+      border-right-color: #4ECDC4;
+    }
+    
+    .break-label {
+      color: #4ECDC4;
+    }
+    
+    .break-btn {
+      background: #4ECDC4;
+    }
+    
+    .nav-bar {
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+      position: relative;
+    }
+    
+    .nav-btn {
+      color: #FF6B6B;
+      font-size: 17px;
+      position: absolute;
+      cursor: pointer;
+    }
+    .nav-btn.left { left: 16px; }
+    .nav-btn.right { right: 16px; }
+  </style>
+</head>
+<body>
+  <h1>포모도로 타이머 🍅</h1>
+  <p class="subtitle">Wireframe v1.0 - iOS 17 Style</p>
+  
+  <div class="screens">
+    <!-- Timer Screen (Idle) -->
+    <div class="screen-container">
+      <div class="screen-label">1. 타이머 (대기)</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="content">
+            <div class="timer-circle">
+              <div class="timer-label">🍅 집중</div>
+              <div class="timer-time">25:00</div>
+              <div class="timer-session">1번째 세션</div>
+            </div>
+            
+            <div class="timer-controls">
+              <div class="control-btn primary">▶</div>
+            </div>
+            
+            <div class="pomodoro-count">
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Timer Screen (Running) -->
+    <div class="screen-container">
+      <div class="screen-label">2. 타이머 (진행 중)</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island active">
+            <span class="di-icon">🍅</span>
+            <span class="di-timer">18:42</span>
+          </div>
+          <div class="status-bar">9:41</div>
+          <div class="content">
+            <div class="timer-circle">
+              <div class="timer-label">🍅 집중 중</div>
+              <div class="timer-time">18:42</div>
+              <div class="timer-session">1번째 세션</div>
+            </div>
+            
+            <div class="timer-controls">
+              <div class="control-btn secondary">⏹</div>
+              <div class="control-btn primary">⏸</div>
+            </div>
+            
+            <div class="pomodoro-count">
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Break Screen -->
+    <div class="screen-container">
+      <div class="screen-label">3. 휴식 시간</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island active">
+            <span class="di-icon">☕</span>
+            <span class="di-timer" style="color: #4ECDC4;">3:24</span>
+          </div>
+          <div class="status-bar">9:41</div>
+          <div class="content">
+            <div class="timer-circle break-circle">
+              <div class="timer-label break-label">☕ 휴식</div>
+              <div class="timer-time">3:24</div>
+              <div class="timer-session">짧은 휴식</div>
+            </div>
+            
+            <div class="timer-controls">
+              <div class="control-btn secondary">⏭</div>
+              <div class="control-btn primary break-btn">⏸</div>
+            </div>
+            
+            <div class="pomodoro-count">
+              <div class="pomo-dot done">✓</div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+              <div class="pomo-dot"></div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats Screen -->
+    <div class="screen-container">
+      <div class="screen-label">4. 통계 화면</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">9:41</div>
+          <div class="nav-bar">
+            통계
+            <span class="nav-btn left">‹ 뒤로</span>
+          </div>
+          <div class="content" style="justify-content: flex-start; padding-top: 16px;">
+            <div class="stats-header">
+              <div class="stats-title">오늘 4시간 15분</div>
+              <div class="stats-sub">🍅 10개 완료</div>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">이번 주 총 집중</span>
+              <span class="stat-value">18시간 30분</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">연속 기록</span>
+              <span class="stat-value">🔥 12일</span>
+            </div>
+            
+            <div class="stat-chart">
+              <div class="chart-title">이번 주 집중 시간</div>
+              <div class="chart-bars">
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 40px;"></div>
+                  <span class="chart-label">월</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 55px;"></div>
+                  <span class="chart-label">화</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 30px;"></div>
+                  <span class="chart-label">수</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 70px;"></div>
+                  <span class="chart-label">목</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 50px;"></div>
+                  <span class="chart-label">금</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 20px; opacity: 0.3;"></div>
+                  <span class="chart-label">토</span>
+                </div>
+                <div class="chart-bar-wrapper">
+                  <div class="chart-bar" style="height: 15px; opacity: 0.3;"></div>
+                  <span class="chart-label">일</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="home-indicator"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Widgets -->
+    <div class="screen-container">
+      <div class="screen-label">5. 위젯</div>
+      <div class="widget-container">
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Small (2×2) - 빠른 시작</div>
+          <div class="widget widget-small">
+            <div class="w-icon">🍅</div>
+            <div class="w-time">25:00</div>
+            <div class="w-btn">▶ 시작</div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Small (진행 중)</div>
+          <div class="widget widget-small">
+            <div class="w-label">집중 중</div>
+            <div class="w-time">18:42</div>
+            <div class="w-stats" style="display: flex; gap: 4px;">
+              <span class="w-pomo">🍅</span>
+              <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+              <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+              <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Medium (4×2) - Interactive</div>
+          <div class="widget widget-medium">
+            <div class="w-left">
+              <div class="w-icon">🍅</div>
+              <div class="w-time">25:00</div>
+              <div class="w-label">탭해서 시작</div>
+              <div class="w-stats">
+                <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+                <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+                <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+                <span class="w-pomo" style="opacity: 0.3;">🍅</span>
+              </div>
+            </div>
+            <div class="w-right">
+              <div class="w-btn primary">▶</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-box">
+          <h3>🎨 디자인 컨셉</h3>
+          <ul>
+            <li>다크 테마 기본 (집중 유도)</li>
+            <li>토마토 레드 액센트</li>
+            <li>큰 타이머 숫자</li>
+            <li>미니멀 컨트롤</li>
+          </ul>
+        </div>
+        
+        <div class="info-box">
+          <h3>📱 주요 기능</h3>
+          <ul>
+            <li>25분 집중 / 5분 휴식</li>
+            <li>Dynamic Island 표시</li>
+            <li>Interactive 위젯</li>
+            <li>일간/주간 통계</li>
+            <li>커스텀 시간 (Pro)</li>
+            <li>앱 블로킹 (v2.0)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="max-width: 800px; margin: 60px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <h2 style="margin-bottom: 20px;">📋 기능 명세</h2>
+    
+    <h3 style="color: #FF6B6B; margin: 20px 0 10px;">핵심 기능 (MVP)</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li>포모도로 타이머 (25/5분)</li>
+      <li>긴 휴식 (15분, 4세션 후)</li>
+      <li>시작/일시정지/리셋</li>
+      <li>Dynamic Island 표시</li>
+      <li>홈스크린 Interactive 위젯</li>
+      <li>기본 통계 (일간)</li>
+    </ul>
+    
+    <h3 style="color: #FF6B6B; margin: 20px 0 10px;">위젯 종류</h3>
+    <ul style="line-height: 2; padding-left: 24px;">
+      <li><b>Small (2×2):</b> 타이머 + 시작 버튼 (Interactive)</li>
+      <li><b>Medium (4×2):</b> 타이머 + 컨트롤 + 오늘 포모도로</li>
+      <li><b>Lock Screen:</b> 남은 시간 / 진행 상태</li>
+      <li><b>StandBy:</b> 큰 타이머 (가로 모드)</li>
+    </ul>
+    
+    <h3 style="color: #FF6B6B; margin: 20px 0 10px;">추가 기능 (v2.0)</h3>
+    <ul style="line-height: 2; padding-left: 24px; color: #666;">
+      <li>커스텀 시간 설정</li>
+      <li>앱 블로킹</li>
+      <li>백색소음</li>
+      <li>프로젝트/태그</li>
+      <li>Apple Watch</li>
+      <li>주간/월간 리포트</li>
+    </ul>
+    
+    <h3 style="color: #FF6B6B; margin: 20px 0 10px;">포모도로 사이클</h3>
+    <div style="background: #f8f8f8; padding: 16px; border-radius: 12px; font-family: monospace; font-size: 13px; line-height: 1.8;">
+      1. 🍅 집중 25분<br>
+      2. ☕ 휴식 5분<br>
+      3. 🍅 집중 25분<br>
+      4. ☕ 휴식 5분<br>
+      5. 🍅 집중 25분<br>
+      6. ☕ 휴식 5분<br>
+      7. 🍅 집중 25분<br>
+      8. 🌴 긴 휴식 15-30분<br>
+      → 반복
+    </div>
+  </div>
+</body>
+</html>
